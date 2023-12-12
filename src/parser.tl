@@ -5,6 +5,13 @@ local S, C, P, V, R, Cc = lpeg.S, lpeg.C, lpeg.P, lpeg.V, lpeg.R, lpeg.Cc
 local whitespace = S" \t\n"^0
 
 local record Node
+    enum Operator
+        "+"
+        "-"
+        "*"
+        "/"
+    end
+
     record Patterns
         number: lpeg.Pattern
         multiplication_division: lpeg.Pattern
@@ -17,14 +24,14 @@ local record Node
     end
     type Value = Node | number
     left: Value
-    operator: string
+    operator: Operator
     right: Value
 
     metamethod __tostring: function(self: Node): string
 end
 
 function Node.create(pattern: lpeg.Pattern): lpeg.Pattern
-    return pattern/function(left: Node.Value, operator: string, right: Node.Value): Node
+    return pattern/function(left: Node.Value, operator: Node.Operator, right: Node.Value): Node
         return setmetatable({ left = left, operator = operator, right = right }, {
             __tostring = function (self: Node): string
                 return string.format("(%s %s %s)", tostring(self.left), self.operator, tostring(self.right))
@@ -32,6 +39,7 @@ function Node.create(pattern: lpeg.Pattern): lpeg.Pattern
         })
     end
 end
+
 
 local digit = R"09"
 Node.Patterns.number = whitespace * C(S"-+"^-1 * (digit^1 * (P"." * digit^0 + P"") + P"." * digit^1))/tonumber

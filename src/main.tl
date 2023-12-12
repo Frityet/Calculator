@@ -1,4 +1,5 @@
 local Node = require("parser")
+local eval = require("evaluator")
 
 local function print_ast(node: Node.Value, indent: integer | nil)
     indent = indent or 0
@@ -28,7 +29,14 @@ if #arg < 1 then
     os.exit(1)
 end
 
+if arg[1] == "--print-ast" then
+    local input = table.concat(arg, " ", 2)
+    local ast = Node.parse(input)
+    print_ast(ast)
+    os.exit(0)
+end
+
 local input = table.concat(arg, " ")
 
 local ast = Node.parse(input)
-print_ast(ast)
+print(eval(ast))
