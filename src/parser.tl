@@ -1,7 +1,7 @@
 local utilities = require("utilities")
 utilities.assert_module_exists("lpeg")
 local lpeg = require("lpeg")
-local S, C, P, V, R = lpeg.S, lpeg.C, lpeg.P, lpeg.V, lpeg.R
+local S, C, P, V, R, Cc = lpeg.S, lpeg.C, lpeg.P, lpeg.V, lpeg.R, lpeg.Cc
 local whitespace = S" \t\n"^0
 
 local record Node
@@ -9,6 +9,7 @@ local record Node
         number: lpeg.Pattern
         multiplication_division: lpeg.Pattern
         addition_subtraction: lpeg.Pattern
+        implicit_multiplication: lpeg.Pattern
         expression: lpeg.Pattern
         term: lpeg.Pattern
         factor: lpeg.Pattern
@@ -33,15 +34,14 @@ function Node.create(pattern: lpeg.Pattern): lpeg.Pattern
 end
 
 local digit = R"09"
-Node.Patterns.number = whitespace *C(S"-+"^-1 * (digit^1 * (P"." * digit^0 + P"") + P"." * digit^1))/tonumber
+Node.Patterns.number = whitespace * C(S"-+"^-1 * (digit^1 * (P"." * digit^0 + P"") + P"." * digit^1))/tonumber
 local number = Node.Patterns.number
 Node.Patterns.multiplication_division = whitespace * C(S"*/") * whitespace
-local multiplication_division = Node.Patterns.multiplication_division
 Node.Patterns.addition_subtraction = whitespace * C(S"+-")  * whitespace
-local addition_subtraction = Node.Patterns.addition_subtraction
+Node.Patterns.implicit_multiplication = #P"(" * Cc"*"
 Node.Patterns.expression = V"term" + V"factor" + V"group" + number
-Node.Patterns.term = Node.create((V"factor" + V"group" + number) * addition_subtraction * V"expression")
-Node.Patterns.factor = Node.create((V"group" + number) * multiplication_division * (V"factor" + V"group" + number))
+Node.Patterns.term = Node.create((V"factor" + V"group" + number) * (Node.Patterns.addition_subtraction + Node.Patterns.implicit_multiplication) * V"expression")
+Node.Patterns.factor = Node.create((V"group" + number) * (Node.Patterns.multiplication_division + Node.Patterns.implicit_multiplication) * (V"factor" + V"group" + number))
 Node.Patterns.group = P"(" * whitespace * V"expression" * whitespace * P")"
 
 local expression = P {
