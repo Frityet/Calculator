@@ -42,12 +42,13 @@ endif
 CFLAGS=-Os
 LDFLAGS=
 ifeq ($(BUILD_STATIC),1)
-	LDFLAGS += -L$(LUAOT_DIR)/src -llua
+	override LDFLAGS += -L$(LUAOT_DIR)/src -llua
 else
-	LDFLAGS += -L$(LUA_LIBDIR) -llua
+	override LDFLAGS += -rdynamic
+	override LDFLAGS += -L$(LUA_LIBDIR) -llua
 endif
 
-LDFLAGS += -lc -lm -ldl
+override LDFLAGS += -lc -lm -ldl
 
 TLFLAGS=
 LUAOTFLAGS=
