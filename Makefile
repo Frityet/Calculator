@@ -95,14 +95,14 @@ check-lua:
 endif
 
 patch-luaot: internal-package-searcher.patch
-	@printf "\x1b[1;35mPatching LuaOT...\x1b[0m\n"
+	@printf "\033[1;35mPatching LuaOT...\033[0m\n"
 #	it actually does patch, i dont know why it says it fails
 	@-patch -f -s $(LUAOT_DIR)/src/luaot.c < $<
 
 
 #git submodule, run `make guess` in that directory to build it
 $(LUAOT): patch-luaot
-	@printf "\x1b[1;35mCompiling LuaOT...\x1b[0m\n"
+	@printf "\033[1;35mCompiling LuaOT...\033[0m\n"
 	$(MAKE) -C $(LUAOT_DIR) $(LUA_TARGET)
 
 #first, a rule for compiling teal files to lua
@@ -112,30 +112,30 @@ $(GEN_DIR)/%.lua: $(SRC_DIR)/%.tl $(LUAOT)
 else
 $(GEN_DIR)/%.lua: $(SRC_DIR)/%.tl
 endif
-	@printf "\x1b[1;35mTranspiling \x1b[1;32m$<\x1b[1;35m to \x1b[1;32m$@\x1b[0m\n"
+	@printf "\033[1;35mTranspiling \033[1;32m$<\033[1;35m to \033[1;32m$@\033[0m\n"
 	@mkdir -p $(GEN_DIR)
 	$(TL_ENV) $(TL) -I$(SRC_DIR) $(TLFLAGS) gen $< -o $@
 
 #then, a rule for compiling lua files to c, if the file is MAIN_FILE then we need to use the -e -i flags aswell
 #use -m to specify the module name, which should be basename of the file
 $(GEN_DIR)/%.c: $(GEN_DIR)/%.lua $(LUAOT)
-	@printf "\x1b[1;35mGenerating C source from \x1b[1;32m$<\x1b[1;35m to \x1b[1;32m$@\x1b[0m\n"
+	@printf "\033[1;35mGenerating C source from \033[1;32m$<\033[1;35m to \033[1;32m$@\033[0m\n"
 	@mkdir -p $(GEN_DIR)
 	$(LUAOT) $(LUAOTFLAGS) -m $(basename $(notdir $<)) -o $@ $<
 
 $(GEN_DIR)/$(MAIN_FILE).c: $(GEN_DIR)/$(MAIN_FILE).lua $(LUAOT)
-	@printf "\x1b[1;35mGenerating C source from \x1b[1;32m$<\x1b[1;35m to \x1b[1;32m$@\x1b[0m\n"
+	@printf "\033[1;35mGenerating C source from \033[1;32m$<\033[1;35m to \033[1;32m$@\033[0m\n"
 	@mkdir -p $(GEN_DIR)
 	$(LUAOT) $(LUAOT_MAIN_FLAGS) -m $(basename $(notdir $<)) -o $@ $<
 
 #then, a rule for compiling c files to object files
 $(OBJ_DIR)/%.o: $(GEN_DIR)/%.c
-	@printf "\x1b[1;35mCompiling \x1b[1;32m$<\x1b[1;35m to \x1b[1;32m$@\x1b[0m\n"
+	@printf "\033[1;35mCompiling \033[1;32m$<\033[1;35m to \033[1;32m$@\033[0m\n"
 	@mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) -I$(LUAOT_DIR)/src -c $< -o $@
 
 #finally, a rule for linking object files to an executable
 $(BIN_DIR)/$(MAIN_FILE): $(OBJECT_FILES)
-	@printf "\x1b[1;35mLinking \x1b[1;32m$@\x1b[0m\n"
+	@printf "\033[1;35mLinking \033[1;32m$@\033[0m\n"
 	@mkdir -p $(BIN_DIR)
 	$(LD) $^ -o $@ $(LDFLAGS)
