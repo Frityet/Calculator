@@ -24,19 +24,21 @@ local function print_ast(node: Node.Value, indent: integer | nil)
     end
 end
 
-if #arg < 1 then
-    print("Usage: lua "..arg[0].." <expression>")
-    os.exit(1)
-end
-
-if arg[1] == "--print-ast" then
-    local input = table.concat(arg, " ", 2)
+local function calculate(input: string): number
     local ast = Node.parse(input)
-    print_ast(ast)
-    os.exit(0)
+    return eval(ast)
 end
 
-local input = table.concat(arg, " ")
-
-local ast = Node.parse(input)
-print(eval(ast))
+local done = false
+repeat
+    io.write("> ")
+    local input = io.read("*l")
+    if input:sub(1, 1) == "q" then
+        done = true
+    elseif input:sub(1, 1) == "!" then
+        print_ast(Node.parse(input:sub(2)))
+        print()
+    else
+        print(calculate(input))
+    end
+until done

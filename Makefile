@@ -19,14 +19,25 @@ else
 	LUA_TARGET=guess
 endif
 
+CC=cc
+LD=$(CC)
 
 LUAOT_DIR=./extern/lua-aot
 LUAOT=$(LUAOT_DIR)/src/luaot
-
-TL=tl
-CC=cc
-LD=$(CC)
 LUA=$(LUAOT_DIR)/src/lua
+
+ARGPARSE_DIR=./extern/argparse/src
+
+TL_VENDORED=1
+ifeq ($(TL_VENDORED),1)
+	TL=./extern/experimental/tl-nolfs/tl
+	# If we are vendored also use the vendored argparse
+	TL_ENV=LUA_PATH="$(ARGPARSE_DIR)/?.lua" $(LUA)
+else
+	TL=tl
+	TL_ENV=
+endif
+
 
 CFLAGS=-Os
 LDFLAGS=
@@ -72,7 +83,7 @@ shared:
 	$(MAKE) release BUILD_STATIC=0
 
 run: debug
-	$(TL) run src/$(MAIN_FILE).tl
+	$(TL_ENV) $(TL) run src/$(MAIN_FILE).tl
 
 
 ifneq ($(LUA),$(LUAOT_DIR)/src/lua)
@@ -94,10 +105,15 @@ $(LUAOT): patch-luaot
 	$(MAKE) -C $(LUAOT_DIR) $(LUA_TARGET)
 
 #first, a rule for compiling teal files to lua
+#vendored installations need to also have luaot already built, so add it as a dependency
+ifeq ($(TL_VENDORED),1)
+$(GEN_DIR)/%.lua: $(SRC_DIR)/%.tl $(LUAOT)
+else
 $(GEN_DIR)/%.lua: $(SRC_DIR)/%.tl
+endif
 	@printf "\x1b[1;35mTranspiling \x1b[1;32m$<\x1b[1;35m to \x1b[1;32m$@\x1b[0m\n"
 	@mkdir -p $(GEN_DIR)
-	$(TL) -I$(SRC_DIR) $(TLFLAGS) gen $< -o $@
+	$(TL_ENV) $(TL) -I$(SRC_DIR) $(TLFLAGS) gen $< -o $@
 
 #then, a rule for compiling lua files to c, if the file is MAIN_FILE then we need to use the -e -i flags aswell
 #use -m to specify the module name, which should be basename of the file

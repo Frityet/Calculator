@@ -1,3 +1,28 @@
 [submodule "extern/lua-aot"]
 	path = extern/lua-aot
 	url = https://github.com/hugomg/lua-aot-5.4
+[submodule "tl-nominal"]
+	path = extern/experimental/nominal
+	url = https://github.com/teal-language/tl
+	branch = experiment-more-nominal
+[submodule "tl-type-narrowing"]
+	path = extern/experimental/type-narrowing
+	url = https://github.com/fgaz/tl
+	branch = type-narrowing-poc
+[submodule "tl-embed"]
+	path = extern/experimental/embed
+	url = https://github.com/pigpigyyy/tl/
+	branch = readonly-field
+[submodule "tl-tagged-records"]
+	path = extern/experimental/tagged-records
+	url = https://github.com/teal-language/tl/
+	branch = tagged-records
+[submodule "tl"]
+	path = extern/tl
+	url = https://github.com/teal-language/tl
+[submodule "tl-nolfs"]
+	path = extern/experimental/tl-nolfs
+	url = https://github.com/Frityet/tl
+[submodule "argparse"]
+	path = extern/argparse
+	url = https://github.com/luarocks/argparse

@@ -5,6 +5,7 @@ local OPERATIONS<const>: { Node.Operator: function(a: number, b: number): number
     ["-"] = function(a: number, b: number): number return a - b end,
     ["*"] = function(a: number, b: number): number return a * b end,
     ["/"] = function(a: number, b: number): number return a / b end,
+    ["^"] = function(a: number, b: number): number return a ^ b end,
 }
 
 local function eval(node: Node.Value): number
